@@ -1,0 +1,42 @@
+body {
+	margin: 0px;
+	padding: 0px;
+	font-family: FontAwesome;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:visited {
+	text-decoration: none;
+}
+
+textarea {
+   resize: none;
+}
+
+#containerDiv {
+	padding-top: 10px;
+/*	background-color: #00a9ff;*/
+}
+
+#navbarDiv {
+	margin-bottom: 0px;
+	font-size: 25px;
+	line-height: 50px;
+}
+
+#navbarHeader {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.usermessages {
+	background-color: lightblue!important;
+	
+}
+
+.otherusermessages {
+	background-color: lightgreen!important;
+}

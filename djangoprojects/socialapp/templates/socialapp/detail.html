@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'socialapp/css/style.css' %}" />
+    <script src="{% static 'socialapp/scripts/main.js' %}"></script>
+    <script src="https://autobahn.s3.amazonaws.com/autobahnjs/latest/autobahn.min.jgz" type="text/javascript"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+</head>
+<body>
+<nav class="navbar navbar-default" id="navbarDiv">
+    <div class="navbar-header" id="navbarHeader">SocialApp</div>
+    <div>
+        <ul class="nav navbar-nav" >
+            <li class="active"><a href="{% url 'socialapp:detail' user.id %}">{{user.user.username}}</a></li>
+            <li>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav pull-right" id="logoutButton">
+            <li>
+                <form method="post" action="{% url 'django.contrib.auth.views.logout' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'socialapp:index' %}" />
+                <button class="btn btn-default btn-lg" type="submit" value="Logout">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="container" id="containerDiv">
+<div class="row">
+    <div class="col-sm-4" id="informationDiv">
+        <div id="profileDiv">
+            <div class="panel panel-default">
+            <div class="panel-heading"><b>Informations</b></div>
+            <div class="panel-body">
+            <ul class="list-group">
+                <li class="list-group-item">First Name: {{user.user.first_name}}</li>
+                <li class="list-group-item">Last Name: {{user.user.last_name}}</li>
+                <li class="list-group-item">E-Mail: {{user.user.email}}</li>
+                <li class="list-group-item">Date Of Birth: {{user.dateOfBirth}}</li>
+                <li class="list-group-item">Profile Pic: {{user.profilePic}}</li>
+            </ul>
+            </div>
+            </div>
+        </div>
+        {% if user.friends.count != 0 %}
+        <hr>
+        <div id="friendsDiv">   
+            <div class="panel panel-default"> 
+            <div class="panel-heading"><b>Friends</b></div>
+            <div class="panel-body">
+            <ul class="list-group">
+                {% for friend in user.friends.all %}
+                <li class="list-group-item">
+                    <form action="{% url 'socialapp:createconversation' user.id %}" method="post"> 
+                    {% csrf_token %}
+                    <a href="{% url 'socialapp:detail' friend.id %}">{{ friend.user.username }}</a>
+                    <input type="hidden" name="friend" value="{{friend.id}}"/>
+                    <input type="submit" value="Talk"/>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-sm-4" id="postsDiv">
+    <div id="statusDiv">
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>Status</b></div>
+            <div class="panel-body">
+            <form action="{% url 'socialapp:createpost' user.id %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <textarea class="form-control" rows="1" name="title" id="title" value="{{title}}" placeholder="Title"></textarea>
+                <textarea class="form-control" rows="3" name="value" id="value" value="{{value}}" placeholder="Post"></textarea>
+            </div>
+            </div>
+            <div class="panel-footer">
+                <button class="btn btn-default" type="submit" value="Post">Post</button>
+            </div>
+            </form>
+            
+        </div>
+    </div>
+    <hr>
+    <div id="wallDiv">
+        {% if user.post_set.count != 0 %}
+        <div class="panel panel-default"><div class="panel-heading"><b>Wall</b></div></div>
+        {% for post in user.ordered_posts %}
+            <div class="panel panel-default" class="posts">
+                <div class="panel-heading"><b>{{post.title}}</b></div>
+                <div class="panel-body">{{post.value}} </div>
+                <div class="panel-footer" >
+                    <button class="btn btn-default" data-toggle="collapse" data-target="#like{{forloop.counter}}">Likes: {{post.postlike_set.count}}</button>
+                    <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{forloop.counter}}">Comments: {{post.comment_set.count}}</button>
+                    <div id="like{{forloop.counter}}" class="collapse" class="panel panel-default">
+                        <hr>
+                        <div class="panel panel-default">
+                        <div class="panel-body">
+                            {% if post.postlike_set.count > 0 %}
+                            Likers: {% for like in post.postlike_set.all %}
+                            {{like.user.user.username}}
+                            {% endfor %}
+                            {% endif %} 
+                            <form action="{% url 'socialapp:likepost' user.id post.id %}" method="post" id="likepostform"> 
+                            {% csrf_token %}
+                            <button class="btn btn-default" type="submit"><i class="fa fa-thumbs-up"></i></button>
+                            </form>
+                        </div>
+                        </div>
+                    </div>
+                    <div id="comment{{forloop.counter}}" class="collapse" class="panel panel-default">
+                        <hr>
+                        <div class="panel-body">
+                            <form action="{% url 'socialapp:commentpost' user.id post.id %}" method="post" id="commentPostForm">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <textarea class="form-control" rows="1" name="comment" id="comment" value="{{comment}}" placeholder="Comment"></textarea>
+                            </div>
+                            <button class="btn btn-default" type="submit" value="Comment">Comment</button>
+                            </form>
+                            {% if post.comment_set.count != 0 %}<hr>{% endif %}
+                            {% for comment in post.ordered_comments %}
+                                <div class="panel panel-default">
+                                <div class="panel-body">
+                                <a href="{% url 'socialapp:detail' comment.user.id %}">{{comment.user.user.username}}</a>: {{comment.value}}</br>
+                                Likes: {{comment.commentlike_set.count}}</br>
+                                {% if comment.commentlike_set.count != 0 %}
+                                Likers: {% for like in comment.commentlike_set.all %}
+                                {{like.user.user.username}}
+                                {% endfor %}
+                                {% endif %}
+                                <form action="{% url 'socialapp:likecomment' user.id post.id %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="comment" value="{{comment.id}}" />
+                                <button class="btn btn-default"  type="submit"><i class="fa fa-thumbs-up"></i></button>
+                                </form>
+                                </div>
+                                </div>
+                            {% endfor %} 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    </div>
+    <div class="col-sm-4" id="conversationsDiv">
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>Conversations</b></div>
+        </div>
+        {% for conversation in user.conversation_set.all %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {% for convuser in conversation.users.all %}
+                    {% if convuser.user.username != user.user.username %}
+                        <b>{{convuser.user.username}}</b>
+                    {% endif %}
+                {% endfor %}    
+                <button class="btn btn-default" data-toggle="collapse" data-target="#conversation{{forloop.counter}}">Talk</button>           
+            </div>
+
+            <div class="collapse" id="conversation{{forloop.counter}}">
+                <div class="panel-body">
+                    {% for message in conversation.last_messages %}
+                        {% if message.user == user %}
+                            <div class="well well-sm usermessages"><a href="{% url 'socialapp:detail' message.user.id %}">{{message.user.user.username}}</a>: {{ message.value }}</div>
+                        {% else %}
+                            <div class="well well-sm otherusermessages"><a href="{% url 'socialapp:detail' message.user.id %}">{{message.user.user.username}}</a>: {{ message.value }}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="panel-footer">
+                    <form action="{% url 'socialapp:createmessage' user.id conversation.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <textarea class="form-control" rows="1" name="message" id="message" value="{{message}}" placeholder="Message"></textarea>
+                        </div>
+                        <button type="submit" value="Message">Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}   
+    </div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{% if users_list %}
+    <ul>
+    {% for u in users_list %}
+        <li><a href="{% url 'socialapp:detail' u.id %}">{{ u.user.username }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No users are available.</p>
+{% endif %}
