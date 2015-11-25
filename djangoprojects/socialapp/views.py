@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User as AuthUser
-import json
+import crossbarhttp
 
 from .models import User, Message, Post, Conversation, Comment, PostLike, CommentLike
 
@@ -41,9 +41,11 @@ def detail(request, user_id):
 
 @login_required
 def createpost(request, user_id):
+	client = crossbarhttp.Client("http://127.0.0.1:8080/publish")
 	user = get_object_or_404(User, pk=user_id)
 	post = Post(title=request.POST['title'], value=request.POST['value'], user=user, date=timezone.now())
 	post.save()
+	client.publish("post", post.title, post.value)
 	return HttpResponseRedirect(reverse('socialapp:detail', args=(user.id,)))
 
 @login_required
@@ -88,8 +90,10 @@ def createconversation(request, user_id):
 
 @login_required
 def createmessage(request, user_id, conversation_id):
+	client = crossbarhttp.Client("http://127.0.0.1:8080/publish")
 	user = get_object_or_404(User, pk=user_id)
 	conversation = get_object_or_404(Conversation, pk=conversation_id)
 	message = Message(value=request.POST['message'], user=user, conversation=conversation, date=timezone.now())
 	message.save()
+	client.publish("message", message.value, message.user.id, message.user.user.username, conversation.id)
 	return HttpResponseRedirect(reverse('socialapp:detail', args=(user.id, )))

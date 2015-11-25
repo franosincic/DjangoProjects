@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script>AUTOBAHN_DEBUG = false;</script>
+    <script src="http://autobahn.s3.amazonaws.com/autobahnjs/latest/autobahn.min.jgz"></script>
     {% load staticfiles %}
     <link rel="stylesheet" type="text/css" href="{% static 'socialapp/css/style.css' %}" />
     <script src="{% static 'socialapp/scripts/main.js' %}"></script>
@@ -165,17 +167,17 @@
                         <b>{{convuser.user.username}}</b>
                     {% endif %}
                 {% endfor %}    
-                <button class="btn btn-default" data-toggle="collapse" data-target="#conversation{{forloop.counter}}">Talk</button>           
+<!--                 <button class="btn btn-default" data-toggle="collapse" data-target="#conversation{{forloop.counter}}">Talk</button>-->            
             </div>
-
-            <div class="collapse" id="conversation{{forloop.counter}}">
-                <div class="panel-body">
+            <div  id="conversation{{forloop.counter}}"> <!--class="collapse"-->
+                <div class="panel-body" id="mesagesContainerDiv{{conversation.id}}">
                     {% for message in conversation.last_messages %}
-                        {% if message.user == user %}
+                        <div class="well well-sm"><a href="{% url 'socialapp:detail' message.user.id %}">{{message.user.user.username}}</a>: {{ message.value }}</div>
+<!--                         {% if message.user == user %}
                             <div class="well well-sm usermessages"><a href="{% url 'socialapp:detail' message.user.id %}">{{message.user.user.username}}</a>: {{ message.value }}</div>
                         {% else %}
                             <div class="well well-sm otherusermessages"><a href="{% url 'socialapp:detail' message.user.id %}">{{message.user.user.username}}</a>: {{ message.value }}</div>
-                        {% endif %}
+                        {% endif %} -->
                     {% endfor %}
                 </div>
                 <div class="panel-footer">
