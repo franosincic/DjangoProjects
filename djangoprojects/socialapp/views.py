@@ -9,19 +9,17 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User as AuthUser
 import crossbarhttp
+import json
 
 from .models import User, Message, Post, Conversation, Comment, PostLike, CommentLike
 
 # Create your views here.
 
-def registration(request):
-	return render(request, 'socialapp/registration.html', )
-
 def registeruser(request):
-	authUser = AuthUser.objects.create_user(username=request.POST['username'], email=request.POST['email'] ,password=request.POST['password'])
+	authUser = AuthUser.objects.create_user(username=request.POST['username'], email=request.POST['email'] ,password=request.POST['password'], first_name=request.POST['firstname'], last_name=request.POST['lastname'])
 	user = User(user=authUser)
 	user.save()
-	return HttpResponseRedirect(reverse('socialapp:index', ))
+	return HttpResponseRedirect(reverse('django.contrib.auth.views.login', ))
 
 @login_required
 def index(request):
@@ -29,31 +27,33 @@ def index(request):
 
 @login_required
 def loginuser(request):
-	loginuserid = AuthUser.objects.get(username=request.user.username)
 	user = User.objects.get(user_id = request.user.id) 
-	return HttpResponseRedirect(reverse('socialapp:detail', args=(user.id,)))
+	return HttpResponseRedirect(reverse('socialapp:detail', args=(user.id,), ))
 
 @login_required
 def detail(request, user_id):
 	user = get_object_or_404(User, pk=user_id)
-	allUsers = User.objects.all()
-   	return render(request, 'socialapp/detail.html', {'user': user, 'allUsers' : allUsers})
+	allPosts = Post.objects.all()
+   	return render(request, 'socialapp/detail.html', {'user': user, 'allPosts' : allPosts})
 
 @login_required
 def createpost(request, user_id):
 	client = crossbarhttp.Client("http://127.0.0.1:8080/publish")
 	user = get_object_or_404(User, pk=user_id)
-	post = Post(title=request.POST['title'], value=request.POST['value'], user=user, date=timezone.now())
+	u = User.objects.get(user_id = request.user.id) 
+	post = Post(title=request.POST['title'], value=request.POST['value'], user=u, date=timezone.now())
 	post.save()
-	client.publish("post", post.title, post.value)
+	client.publish("post", post.title, post.value, post.id, user.id)
 	return HttpResponseRedirect(reverse('socialapp:detail', args=(user.id,)))
 
 @login_required
 def commentpost(request, user_id, post_id):
+	#client = crossbarhttp.Client("http://127.0.0.1:8080/publish")
 	post = get_object_or_404(Post, pk=post_id)
 	user = get_object_or_404(User, pk=user_id)
 	comment = Comment(value=request.POST['comment'], user=user, post=post, date=timezone.now())
 	comment.save()
+	#client.publish("comment", comment.value, comment.id, comment.post.id, comment.user.id)
 	return HttpResponseRedirect(reverse('socialapp:detail', args=(user.id, )))
 
 @login_required
@@ -75,17 +75,20 @@ def likecomment(request, user_id, post_id):
 
 @login_required
 def createconversation(request, user_id):
+	client = crossbarhttp.Client("http://127.0.0.1:8080/publish")
 	user = get_object_or_404(User, pk=user_id)
 	otherUser = get_object_or_404(User, pk=request.POST['friend'])
 	for conv in user.conversation_set.all():
 		if conv.users.count() == 2:
 			if otherUser in conv.users.all():
+				client.publish("talk", conv.id, user.id)
 				return HttpResponseRedirect(reverse('socialapp:detail', args=(user.id, )))
 	conversation = Conversation(date=timezone.now())
 	conversation.save()
 	conversation.users.add(user)
 	conversation.users.add(otherUser)
 	conversation.save()
+	client.publish("conversation", conversation.id, user.id, otherUser.user.username)
 	return HttpResponseRedirect(reverse('socialapp:detail', args=(user.id, )))
 
 @login_required

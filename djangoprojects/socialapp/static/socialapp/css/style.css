@@ -32,6 +32,21 @@ textarea {
 	padding-right: 10px;
 }
 
+/*#informationDiv {
+	width: 25%;
+	min-width: 300px;
+}
+
+#postsDiv {
+	width: 50%;
+	min-width: 300px;
+}
+
+#conversationsDiv {
+	width: 25%;
+	min-width: 300px;
+}*/
+
 .usermessages {
 	background-color: lightblue!important;
 	

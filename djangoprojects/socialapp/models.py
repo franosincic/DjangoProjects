@@ -31,7 +31,7 @@ class Conversation(models.Model):
 		return ", ".join([user.user.username for user in self.users.all()])
 	def last_messages(self):
 		orderedMessages = self.message_set.all().order_by('-date')
-		return orderedMessages[:3]
+		return orderedMessages[:5]
 	def ordered_messages(self):
 		return self.message_set.all().order_by('-date')
 
@@ -54,8 +54,8 @@ class Post(Content):
 	title = models.CharField(max_length=200)
 	def __unicode__(self):
 		return "Post: %s User: %s" % (self.title, self.user.user.username)
-	def ordered_comments(self):
-		return self.comment_set.all().order_by('-date')
+	def last_comments(self):
+		return self.comment_set.all().order_by('-date')[:5]
 
 class Comment(Content):
 	post = models.ForeignKey(Post)

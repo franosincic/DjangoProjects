@@ -1,42 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Login</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    {% load staticfiles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'socialapp/css/style.css' %}" />
+	<title>Home Page</title>
 </head>
 <body>
 
-<b>Login</b>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title">Login</div>
+                </div>
+                <div class="panel-body">
+                    <form action="{% url 'django.contrib.auth.views.login' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input class="form-control" name="username" id="username" value="{{username}}" placeholder="Username"></input>
+                        <input class="form-control" type="password" name="password" id="password" value="{{password}}" placeholder="Password"></input>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-default" type="submit" name="next" value="{% url 'socialapp:loginuser' %}">Login</button>
+                    </form>
 
+                    {% if form.errors %}
+                        <p>Your username and password didn't match. Please try again.</p>
+                    {% endif %}
+                    
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title">Register</div>
+                </div>
+                <div class="panel-body">
+                    <form action="{% url 'socialapp:registeruser' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input class="form-control" name="firstname" id="firstname" value="{{firstname}}" placeholder="Firstname"></input>
+                        <input class="form-control" name="lastname" id="lastname" value="{{lastname}}" placeholder="Lastname"></input>
+                        <input class="form-control" name="email" id="email" value="{{email}}" placeholder="Email"></input>
+                        <input class="form-control" name="username" id="username" value="{{username}}" placeholder="Username"></input>
+                        <input class="form-control" type="password" name="password" id="password" value="{{password}}" placeholder="Password"></input>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                        <button class="btn btn-default" type="submit" value="Register">Register</button>
+                </div>
+                    </form>
 
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
-
-{% if next %}
-    {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
-    {% else %}
-    <p>Please login to see this page.</p>
-    {% endif %}
-{% endif %}
-
-<form method="post" action="{% url 'django.contrib.auth.views.login' %}">
-{% csrf_token %}
-<table>
-<tr>
-    <td>{{ form.username.label_tag }}</td>
-    <td>{{ form.username }}</td>
-</tr>
-<tr>
-    <td>{{ form.password.label_tag }}</td>
-    <td>{{ form.password }}</td>
-</tr>
-</table>
-
-<input type="submit" value="login" />
-<input type="hidden" name="next" value="{% url 'socialapp:loginuser' %}" />
-</form>
-
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

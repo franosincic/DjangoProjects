@@ -64,9 +64,19 @@
                "extra": {
                   "subscriptions": [
                      {"url": "https://httpbin.org/post",
+                      "topic": "conversation"},
+                     {"url": "https://httpbin.org/post",
                       "topic": "message"},
                      {"url": "https://httpbin.org/post",
                       "topic": "post"},
+                     {"url": "https://httpbin.org/post",
+                      "topic": "comment"},
+                     {"url": "https://httpbin.org/post",
+                      "topic": "likepost"},
+                     {"url": "https://httpbin.org/post",
+                      "topic": "likecomment"},
+                     {"url": "https://httpbin.org/post",
+                      "topic": "talk"}
                   ],
                   "method": "POST",
                   "expectedcode": 200,
